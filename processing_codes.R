@@ -2,9 +2,10 @@ options(stringsAsFactors=F)
 .libPaths("/storage/home/cxk502/work/R_library/")
 library(dplyr)
 library(data.table)
+library(sas7bdat)
 
 path = "/storage/home/cxk502/scratch/cancer_cost/2018"
-filename = dir(path, pattern = "cost")
+filename = dir(path, pattern = "sas7bdat")
 
 ##Overview of CPT: https://www.medicalbillingandcoding.org/intro-to-cpt/#:~:text=Category%20I%20CPT%20codes%20are%20numeric%2C%20and%20are%20five%20digits,Pathology%20and%20Laboratory%2C%20and%20Medicine.##
 
@@ -80,7 +81,7 @@ cpt$code = as.character(cpt$code)
 ##Identify top 50 CPT codes according to data from 15 cancer types##
 df = data.frame()
 for (i in 1:length(filename)){
-	df_temp = read.table(paste(path, "/", filename[i], sep = ""), header = TRUE, sep = ",")
+	df_temp = read.sas7bdat(paste(path, "/", filename[i], sep = ""))
 	df = rbind(df, df_temp)	
 }
 df = as.data.frame(df %>% group_by(PROC1) %>% summarise(Total_count = sum(COUNT)))
@@ -100,3 +101,5 @@ merge = merge %>% select(category, PROC1, DESCRIPTION, Total_count)
 colnames(merge) = c("CATEGORY", "PROCEDURE_CODE", "DESCRIPTION", "COUNT")
 
 write.table(merge, "/gpfs/scratch/cxk502/cancer_cost/2018/code_merged_count.txt", col.names = TRUE, row.names = FALSE, sep = "\t", quote = FALSE)
+
+###############################################################################################################################################################################################################
